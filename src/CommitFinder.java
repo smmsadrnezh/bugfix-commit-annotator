@@ -22,17 +22,24 @@ import java.util.List;
 /**
  * Created by smmsadrnezh on 11/30/16.
  */
+
 public class CommitFinder {
 
     private Repository repository;
     private String path;
     private Git git;
     private RevWalk walk;
-    private ArrayList<String> bugTerms;
+    private ArrayList<String> bugTerms = new ArrayList<String>() {{
+        add("bugfix");
+        add("fix");
+        add("bug");
+        add("issue");
+    }};
     private BlameCommand blamer = new BlameCommand(repository);
     private ArrayList<RevCommit> bugfixCommits = new ArrayList<>();
     private HashMap<RevCommit, ArrayList<RevCommit>> result = new HashMap<>();
     private List<DiffEntry> diffEntries;
+    private Iterable<RevCommit> allCommits;
 
     CommitFinder(String path) {
         this.path = path;
@@ -53,21 +60,13 @@ public class CommitFinder {
     }
 
     void findBugfixCommits() {
+
         try {
-            Iterable<RevCommit> commits = git.log().all().call();
+            allCommits = git.log().all().call();
 
-            bugTerms = new ArrayList<String>() {{
-                add("bugfix");
-                add("fix");
-                add("bug");
-                add("issue");
-            }};
-
-            for (RevCommit commit : commits) {
-                for (String bugTerm : bugTerms) {
-                    if (commit.getShortMessage().toLowerCase().contains(bugTerm)) {
-                        bugfixCommits.add(commit);
-                    }
+            for (RevCommit commit : allCommits) {
+                if (isBugfixCommit(commit)) {
+                    bugfixCommits.add(commit);
                 }
             }
 
@@ -76,6 +75,17 @@ public class CommitFinder {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    Boolean isBugfixCommit(RevCommit commit) {
+
+        for (String bugTerm : bugTerms) {
+            if (commit.getShortMessage().toLowerCase().contains(bugTerm)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void annotateRevisions() throws GitAPIException, IOException {
