@@ -25,9 +25,10 @@ public class CommitFinder {
     private RevWalk walk;
     private ArrayList<String> bugTerms;
     private BlameCommand blamer = new BlameCommand(repository);
-    private HashMap<RevCommit,ArrayList<RevCommit>> result = new HashMap<>();
+    private ArrayList<RevCommit> bugfixCommits = new ArrayList<>();
+    private HashMap<RevCommit, ArrayList<RevCommit>> result = new HashMap<>();
 
-    CommitFinder(String path){
+    CommitFinder(String path) {
         this.path = path;
     }
 
@@ -44,21 +45,22 @@ public class CommitFinder {
         walk = new RevWalk(repository);
 
     }
-    void findBugfixCommits(){
+
+    void findBugfixCommits() {
         try {
             Iterable<RevCommit> commits = git.log().all().call();
 
             bugTerms = new ArrayList<String>() {{
                 add("bugfix");
                 add("fix");
+                add("bug");
+                add("issue");
             }};
 
             for (RevCommit commit : commits) {
-                for(String bugTerm : bugTerms)
-                {
-                    if(commit.getShortMessage().toLowerCase().contains(bugTerm))
-                    {
-                        annotateRevisions(commit);
+                for (String bugTerm : bugTerms) {
+                    if (commit.getShortMessage().toLowerCase().contains(bugTerm)) {
+                        bugfixCommits.add(commit);
                     }
                 }
             }
@@ -70,18 +72,22 @@ public class CommitFinder {
         }
     }
 
-    void annotateRevisions(RevCommit commit) throws GitAPIException {
+    void annotateRevisions() throws GitAPIException {
 
-        String changedFilePath = "README.md";
-        int lineNumber = 0;
+        for (RevCommit commit : bugfixCommits) {
 
-        blamer.setFilePath(changedFilePath);
-        blamer.setStartCommit(commit.getId());
-        BlameResult blame = blamer.call();
-        RevCommit annotationCommit = blame.getSourceCommit(lineNumber);
-        ArrayList<RevCommit> annotateBugyCommits = new ArrayList<>();
-        annotateBugyCommits.add(annotationCommit);
+            String changedFilePath = "README.md";
+            int lineNumber = 0;
 
-        result.put(commit,annotateBugyCommits);
+            blamer.setFilePath(changedFilePath);
+            blamer.setStartCommit(commit.getId());
+            BlameResult blame = blamer.call();
+            RevCommit annotationCommit = blame.getSourceCommit(lineNumber);
+            ArrayList<RevCommit> annotateBugyCommits = new ArrayList<>();
+            annotateBugyCommits.add(annotationCommit);
+
+            result.put(commit, annotateBugyCommits);
+
+        }
     }
 }

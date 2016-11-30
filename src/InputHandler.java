@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class InputHandler {
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, GitAPIException {
 
         Scanner scanner = new Scanner(System.in);
         String path = scanner.nextLine();
@@ -14,6 +14,7 @@ public class InputHandler {
         CommitFinder commitFinder = new CommitFinder(path);
         commitFinder.initializeRepository();
         commitFinder.findBugfixCommits();
+        commitFinder.annotateRevisions();
     }
 
 }
