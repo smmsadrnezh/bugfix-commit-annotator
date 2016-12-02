@@ -10,7 +10,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/org.eclipse.jgit-4.5.0.201609210915-r.jar!/" />
+          <root url="jar://$MODULE_DIR$/jar/org.eclipse.jgit-4.5.0.201609210915-r.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -19,7 +19,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/slf4j-api-1.7.21.jar!/" />
+          <root url="jar://$MODULE_DIR$/jar/slf4j-jdk14-1.7.21.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -28,7 +28,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/slf4j-jdk14-1.7.21.jar!/" />
+          <root url="jar://$MODULE_DIR$/jar/slf4j-api-1.7.21.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
