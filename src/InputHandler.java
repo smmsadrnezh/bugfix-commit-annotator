@@ -14,7 +14,7 @@ public class InputHandler {
         CommitFinder commitFinder = new CommitFinder(path);
         commitFinder.initializeRepository();
         commitFinder.findBugfixCommits();
-        commitFinder.annotateRevisions();
+        commitFinder.annotateCommits();
     }
 
 }
