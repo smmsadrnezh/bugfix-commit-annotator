@@ -33,6 +33,7 @@ public class CommitFinder {
         add("fix");
         add("bug");
         add("issue");
+        add("resolve");
     }};
     private BlameCommand blamer;
     private ArrayList<RevCommit> bugfixCommits = new ArrayList<>();
@@ -76,7 +77,7 @@ public class CommitFinder {
         }
     }
 
-    Boolean isBugfixCommit(RevCommit commit) {
+    private Boolean isBugfixCommit(RevCommit commit) {
 
         for (String bugTerm : bugTerms) {
             if (commit.getShortMessage().toLowerCase().contains(bugTerm)) {
