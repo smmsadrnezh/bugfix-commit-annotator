@@ -4,6 +4,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -92,36 +93,37 @@ public class CommitFinder {
 
         for (RevCommit bugfixCommit : bugfixCommits) {
 
-            ObjectReader reader = repository.newObjectReader();
+            diffEntries = getDiffEntries(bugfixCommit);
 
-            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-            ObjectId oldTree = bugfixCommit.getTree();
-            oldTreeIter.reset(reader, oldTree);
-
-            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-            ObjectId newTree = bugfixCommit.getParent(0).getTree();
-            newTreeIter.reset(reader, newTree);
-
-            DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
-            diffFormatter.setRepository(repository);
-            diffEntries = diffFormatter.scan(oldTreeIter, newTreeIter);
+            System.out.println("Commit: " + bugfixCommit.getShortMessage());
 
             for (DiffEntry diffEntry : diffEntries) {
                 if (diffEntry.getChangeType().toString() == "MODIFY") {
-                    String changedFilePath = diffEntry.getPath(DiffEntry.Side.NEW);
-                    int lineNumber = 0;
-
-                    blamer.setFilePath(changedFilePath);
-                    blamer.setStartCommit(bugfixCommit.getId());
-                    BlameResult blame = blamer.call();
-                    RevCommit annotationCommit = blame.getSourceCommit(lineNumber);
-                    ArrayList<RevCommit> annotateCommits = new ArrayList<>();
-                    annotateCommits.add(annotationCommit);
-
-                    result.put(bugfixCommit, annotateCommits);
+//                    String changedFilePath = diffEntry.getPath(DiffEntry.Side.NEW);
+//                    int lineNumber = 0;
+//
+//                    blamer.setFilePath(changedFilePath);
+//                    blamer.setStartCommit(bugfixCommit.getId());
+//                    BlameResult blame = blamer.call();
+//                    RevCommit annotationCommit = blame.getSourceCommit(lineNumber);
+//                    ArrayList<RevCommit> annotateCommits = new ArrayList<>();
+//                    annotateCommits.add(annotationCommit);
+//
+//                    result.put(bugfixCommit, annotateCommits);
                 }
             }
 
         }
+    }
+
+    private List<DiffEntry> getDiffEntries(RevCommit bugfixCommit) throws IOException {
+
+        DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
+        diffFormatter.setRepository(repository);
+        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+        diffFormatter.setDetectRenames(true);
+
+        return diffFormatter.scan(bugfixCommit.getTree(), bugfixCommit.getParent(0).getTree());
+
     }
 }
