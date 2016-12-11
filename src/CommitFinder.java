@@ -88,13 +88,12 @@ public class CommitFinder {
                 if (diffEntry.getChangeType().toString() == "MODIFY") {
                     for (Edit edit : diffManager.getEdits(diffEntry)) {
 
-                        /** find line numbers */
+                        /** find changed line numbers */
                         int endA = edit.getEndA();
                         int beginA = edit.getBeginA();
                         int endB = edit.getEndB();
                         int beginB = edit.getBeginB();
 
-                        /** find changed file path */
                         String changedFilePath = diffEntry.getPath(DiffEntry.Side.NEW);
 
                         /** find commit Id to annotate from */
