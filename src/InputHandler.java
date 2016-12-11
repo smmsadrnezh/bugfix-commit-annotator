@@ -1,8 +1,6 @@
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class InputHandler {
@@ -19,6 +17,7 @@ public class InputHandler {
         CommitFinder commitFinder = new CommitFinder(path);
         commitFinder.initializeRepository();
 
+        /** Run Program */
         commitFinder.annotateCommits(commitFinder.findBugfixCommits());
     }
 

@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by smmsadrnezh on 11/30/16.
@@ -31,9 +30,7 @@ public class CommitFinder {
         add("issue");
         add("resolve");
     }};
-    private BlameCommand blamer;
     private HashMap<RevCommit, ArrayList<RevCommit>> result = new HashMap<>();
-    private List<DiffEntry> edits;
 
     CommitFinder(String path) {
         this.path = path;
@@ -82,7 +79,6 @@ public class CommitFinder {
 
     void annotateCommits(ArrayList<RevCommit> bugfixCommits) throws GitAPIException, IOException {
 
-
         for (RevCommit bugfixCommit : bugfixCommits) {
 
             DiffManager diffManager = new DiffManager(repository);
@@ -112,12 +108,12 @@ public class CommitFinder {
                     }
                 }
             }
-
         }
     }
 
     private RevCommit annotateEdit(ObjectId startCommitId, String changedFilePath, int lineNumber) throws GitAPIException {
 
+        BlameCommand blamer;
         blamer = new BlameCommand(repository);
         blamer.setFilePath(changedFilePath);
         blamer.setStartCommit(startCommitId);

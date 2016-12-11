@@ -13,7 +13,7 @@ public class DiffManager {
 
     private DiffFormatter diffFormatter;
 
-    DiffManager(Repository repository){
+    DiffManager(Repository repository) {
         /** Set diffFormatter */
         diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
         diffFormatter.setRepository(repository);
