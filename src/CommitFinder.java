@@ -88,19 +88,24 @@ public class CommitFinder {
                 if (diffEntry.getChangeType().toString() == "MODIFY") {
                     for (Edit edit : diffManager.getEdits(diffEntry)) {
 
-                        /** find changed line numbers */
-                        int endA = edit.getEndA();
-                        int beginA = edit.getBeginA();
-                        int endB = edit.getEndB();
-                        int beginB = edit.getBeginB();
+                        /** find deleted line numbers */
+                        ArrayList<Integer> deletedLines = new ArrayList();
+                        if (edit.getEndA() < edit.getEndB()) {
+                            for (int line = edit.getEndA(); line <= edit.getEndB(); line++) {
+                                deletedLines.add(line);
+                            }
+                        } else {
+                            deletedLines.add(edit.getEndB());
+                        }
 
                         String changedFilePath = diffEntry.getPath(DiffEntry.Side.NEW);
 
                         /** find commit Id to annotate from */
-                        ObjectId commitId = bugfixCommit.getId();
+                        ObjectId annotateFromCommitId = bugfixCommit.getId();
 
                         ArrayList<RevCommit> annotateCommits = new ArrayList<>();
-                        annotateCommits.add(annotateEdit(commitId, changedFilePath, endA));
+                        for (Integer deletedLineNumber : deletedLines)
+                            annotateCommits.add(annotateEdit(annotateFromCommitId, changedFilePath, deletedLineNumber));
 
                         result.put(bugfixCommit, annotateCommits);
 
