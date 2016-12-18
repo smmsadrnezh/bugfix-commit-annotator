@@ -1,6 +1,7 @@
 import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.blame.BlameGenerator;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.Edit;
@@ -36,15 +37,10 @@ public class CommitFinder {
         this.path = path;
     }
 
-    void initializeRepository() {
+    void initializeRepository() throws IOException {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        try {
-            repository = builder.setGitDir(new File(path))
-                    .readEnvironment().findGitDir().build();
-        } catch (Exception e) {
-            System.out.println("git address is not valid");
-        }
-
+        repository = builder.setGitDir(new File(path))
+                .readEnvironment().findGitDir().build();
         git = new Git(repository);
 
     }
@@ -115,7 +111,7 @@ public class CommitFinder {
         }
     }
 
-    private RevCommit annotateEdit(ObjectId startCommitId, String changedFilePath, int lineNumber) throws GitAPIException {
+    private RevCommit annotateEdit(ObjectId startCommitId, String changedFilePath, int lineNumber) throws GitAPIException, IOException {
 
         BlameCommand blamer;
         blamer = new BlameCommand(repository);
@@ -123,7 +119,20 @@ public class CommitFinder {
         blamer.setStartCommit(startCommitId);
         BlameResult blame = blamer.call();
         RevCommit annotationCommit = blame.getSourceCommit(lineNumber);
-        System.out.println("Diff Annotate: " + annotationCommit.getShortMessage());
+
+//        BlameGenerator blameGenerator;
+//        blameGenerator = new BlameGenerator(repository,changedFilePath);
+//        blameGenerator.setFollowFileRenames(true);
+//        BlameResult aa = blameGenerator.computeBlameResult();
+//        RevCommit annotationCommit = aa.getSourceCommit(lineNumber);
+
+        System.out.println("Annotation Commit: " + annotationCommit.getShortMessage());
+        System.out.println("Annotation ID: " + annotationCommit.getId().toString().replaceAll("commit ","").replaceAll("-","").replaceAll(" p",""));
+        System.out.println("Start ID: " + startCommitId.toString().replaceAll("commit ","").replaceAll("-","").replaceAll(" sp",""));
+        System.out.println("Path: " + changedFilePath);
+        System.out.println("Line Number: " + lineNumber);
+        System.out.println("");
+        
         return annotationCommit;
 
     }
