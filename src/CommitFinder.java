@@ -120,19 +120,6 @@ public class CommitFinder {
 
     private RevCommit annotateLine(ObjectId annotateFromCommitId, BlameResult fileBlameResult, int lineNumber) throws GitAPIException, IOException {
 
-//        BlameCommand blamer;
-//        blamer = new BlameCommand(repository);
-//        blamer.setFilePath(changedFilePath);
-//        blamer.setStartCommit(startCommitId);
-//        BlameResult blame = blamer.call();
-//        RevCommit annotationCommit = blame.getSourceCommit(lineNumber);
-
-//        BlameGenerator blameGenerator;
-//        blameGenerator = new BlameGenerator(repository,changedFilePath);
-//        blameGenerator.setFollowFileRenames(true);
-//        BlameResult aa = blameGenerator.computeBlameResult();
-//        RevCommit annotationCommit = aa.getSourceCommit(lineNumber);
-
         System.out.println("Line Number: " + lineNumber);
 
         RevCommit annotationCommit = fileBlameResult.getSourceCommit(lineNumber);
