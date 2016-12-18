@@ -80,8 +80,8 @@ public class CommitFinder {
             /** find commit Id to annotate from */
             ObjectId annotateFromCommitId = bugfixCommit.getId();
 
-            /** checkout to annotateFromCommitId */
-            git.checkout().setName(annotateFromCommitId.toString()).call();
+            /** checkout to one commit before annotateFromCommitId */
+            git.checkout().setName(bugfixCommit.getParent(0).getName()).call();
 
             /** Find MODIFY edits */
             for (DiffEntry diffEntry : diffManager.getDiffEntries(bugfixCommit)) {
