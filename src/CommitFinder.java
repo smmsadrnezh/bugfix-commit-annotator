@@ -1,7 +1,5 @@
-import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.blame.BlameGenerator;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.Edit;
@@ -79,9 +77,19 @@ public class CommitFinder {
 
             DiffManager diffManager = new DiffManager(repository);
 
+            /** find commit Id to annotate from */
+            ObjectId annotateFromCommitId = bugfixCommit.getId();
+
+            /** checkout to annotateFromCommitId */
+            git.checkout().setName(annotateFromCommitId.toString()).call();
+
             /** Find MODIFY edits */
             for (DiffEntry diffEntry : diffManager.getDiffEntries(bugfixCommit)) {
                 if (diffEntry.getChangeType().toString() == "MODIFY") {
+
+                    String changedFilePath = diffEntry.getPath(DiffEntry.Side.NEW);
+                    BlameResult fileBlameResult = annotateFile(changedFilePath);
+
                     for (Edit edit : diffManager.getEdits(diffEntry)) {
 
                         /** find deleted line numbers */
@@ -94,14 +102,9 @@ public class CommitFinder {
                             deletedLines.add(edit.getEndB());
                         }
 
-                        String changedFilePath = diffEntry.getPath(DiffEntry.Side.NEW);
-
-                        /** find commit Id to annotate from */
-                        ObjectId annotateFromCommitId = bugfixCommit.getId();
-
                         ArrayList<RevCommit> annotateCommits = new ArrayList<>();
                         for (Integer deletedLineNumber : deletedLines)
-                            annotateCommits.add(annotateEdit(annotateFromCommitId, changedFilePath, deletedLineNumber));
+                            annotateCommits.add(annotateLine(annotateFromCommitId, fileBlameResult, deletedLineNumber));
 
                         result.put(bugfixCommit, annotateCommits);
 
@@ -111,7 +114,11 @@ public class CommitFinder {
         }
     }
 
-    private RevCommit annotateEdit(ObjectId startCommitId, String changedFilePath, int lineNumber) throws GitAPIException, IOException {
+    private BlameResult annotateFile(String changedFilePath) throws GitAPIException {
+        return git.blame().setFilePath(changedFilePath).call();
+    }
+
+    private RevCommit annotateLine(ObjectId annotateFromCommitId, BlameResult fileBlameResult, int lineNumber) throws GitAPIException, IOException {
 
 //        BlameCommand blamer;
 //        blamer = new BlameCommand(repository);
@@ -126,17 +133,15 @@ public class CommitFinder {
 //        BlameResult aa = blameGenerator.computeBlameResult();
 //        RevCommit annotationCommit = aa.getSourceCommit(lineNumber);
 
-
-        BlameResult result = new Git(repository).blame().setFilePath(changedFilePath).call();
-        RevCommit annotationCommit = result.getSourceCommit(lineNumber);
-
-        System.out.println("Annotate From Commit ID: " + startCommitId.toString().replaceAll("commit ","").replaceAll("-","").replaceAll(" sp",""));
-        System.out.println("Annotated Commit: " + annotationCommit.getShortMessage());
-        System.out.println("Annotated ID: " + annotationCommit.getId().toString().replaceAll("commit ","").replaceAll("-","").replaceAll(" p",""));
-        System.out.println("Path: " + changedFilePath);
         System.out.println("Line Number: " + lineNumber);
+
+        RevCommit annotationCommit = fileBlameResult.getSourceCommit(lineNumber);
+
+        System.out.println("Annotate From Commit ID: " + annotateFromCommitId.toString().replaceAll("commit ", "").replaceAll("-", "").replaceAll(" sp", ""));
+        System.out.println("Annotated Commit: " + annotationCommit.getShortMessage());
+        System.out.println("Annotated ID: " + annotationCommit.getId().toString().replaceAll("commit ", "").replaceAll("-", "").replaceAll(" p", ""));
         System.out.println("");
-        
+
         return annotationCommit;
 
     }
