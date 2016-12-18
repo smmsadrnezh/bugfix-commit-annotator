@@ -113,12 +113,12 @@ public class CommitFinder {
 
     private RevCommit annotateEdit(ObjectId startCommitId, String changedFilePath, int lineNumber) throws GitAPIException, IOException {
 
-        BlameCommand blamer;
-        blamer = new BlameCommand(repository);
-        blamer.setFilePath(changedFilePath);
-        blamer.setStartCommit(startCommitId);
-        BlameResult blame = blamer.call();
-        RevCommit annotationCommit = blame.getSourceCommit(lineNumber);
+//        BlameCommand blamer;
+//        blamer = new BlameCommand(repository);
+//        blamer.setFilePath(changedFilePath);
+//        blamer.setStartCommit(startCommitId);
+//        BlameResult blame = blamer.call();
+//        RevCommit annotationCommit = blame.getSourceCommit(lineNumber);
 
 //        BlameGenerator blameGenerator;
 //        blameGenerator = new BlameGenerator(repository,changedFilePath);
@@ -126,9 +126,13 @@ public class CommitFinder {
 //        BlameResult aa = blameGenerator.computeBlameResult();
 //        RevCommit annotationCommit = aa.getSourceCommit(lineNumber);
 
-        System.out.println("Annotation Commit: " + annotationCommit.getShortMessage());
-        System.out.println("Annotation ID: " + annotationCommit.getId().toString().replaceAll("commit ","").replaceAll("-","").replaceAll(" p",""));
-        System.out.println("Start ID: " + startCommitId.toString().replaceAll("commit ","").replaceAll("-","").replaceAll(" sp",""));
+
+        BlameResult result = new Git(repository).blame().setFilePath(changedFilePath).call();
+        RevCommit annotationCommit = result.getSourceCommit(lineNumber);
+
+        System.out.println("Annotate From Commit ID: " + startCommitId.toString().replaceAll("commit ","").replaceAll("-","").replaceAll(" sp",""));
+        System.out.println("Annotated Commit: " + annotationCommit.getShortMessage());
+        System.out.println("Annotated ID: " + annotationCommit.getId().toString().replaceAll("commit ","").replaceAll("-","").replaceAll(" p",""));
         System.out.println("Path: " + changedFilePath);
         System.out.println("Line Number: " + lineNumber);
         System.out.println("");

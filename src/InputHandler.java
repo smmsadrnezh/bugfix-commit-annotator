@@ -9,9 +9,7 @@ public class InputHandler {
     public static void main(String[] args) throws IOException, GitAPIException {
 
         /** Read Repository Path */
-        Scanner scanner = new Scanner(System.in);
-        String path = scanner.nextLine();
-        scanner.close();
+        String path = new Scanner(System.in).nextLine();
 
         /** Initialize Repository */
         CommitFinder commitFinder = new CommitFinder(path);
@@ -19,6 +17,7 @@ public class InputHandler {
 
         /** Run Program */
         commitFinder.annotateCommits(commitFinder.findBugfixCommits());
+
     }
 
 }
