@@ -121,10 +121,10 @@ public class CommitFinder {
     private RevCommit annotateLine(ObjectId annotateFromCommitId, BlameResult fileBlameResult, int lineNumber) throws GitAPIException, IOException {
 
         System.out.println("Line Number: " + lineNumber);
-
-        RevCommit annotationCommit = fileBlameResult.getSourceCommit(lineNumber);
-
         System.out.println("Annotate From Commit ID: " + annotateFromCommitId.toString().replaceAll("commit ", "").replaceAll("-", "").replaceAll(" sp", ""));
+
+        RevCommit annotationCommit = fileBlameResult.getSourceCommit(lineNumber - 1);
+
         System.out.println("Annotated Commit: " + annotationCommit.getShortMessage());
         System.out.println("Annotated ID: " + annotationCommit.getId().toString().replaceAll("commit ", "").replaceAll("-", "").replaceAll(" p", ""));
         System.out.println("");
