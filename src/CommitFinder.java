@@ -29,7 +29,7 @@ public class CommitFinder {
         add("issue");
         add("resolve");
     }};
-    private HashMap<RevCommit, ArrayList<RevCommit>> result = new HashMap<>();
+    private HashMap<RevCommit, HashMap> result = new HashMap<>();
 
     CommitFinder(String path) {
         this.path = path;
@@ -102,16 +102,33 @@ public class CommitFinder {
                             deletedLines.add(edit.getEndB());
                         }
 
-                        ArrayList<RevCommit> annotateCommits = new ArrayList<>();
-                        for (Integer deletedLineNumber : deletedLines)
-                            annotateCommits.add(annotateLine(annotateFromCommitId, fileBlameResult, deletedLineNumber));
-
-                        result.put(bugfixCommit, annotateCommits);
+//                        buildResult(deletedLines, annotateFromCommitId, fileBlameResult, bugfixCommit);
 
                     }
                 }
             }
         }
+    }
+
+    private String getCode(RevCommit revCommit) {
+        return "salam";
+    }
+
+    private void buildResult(ArrayList<Integer> deletedLines, ObjectId annotateFromCommitId, BlameResult fileBlameResult, RevCommit bugfixCommit) throws GitAPIException, IOException {
+        /** find annotate commits for each line */
+        HashMap<RevCommit, ArrayList<Integer>> annotateCommits = new HashMap<>();
+        RevCommit line;
+        for (Integer deletedLineNumber : deletedLines) {
+            line = annotateLine(annotateFromCommitId, fileBlameResult, deletedLineNumber);
+            if (annotateCommits.get(line) == null) {
+                ArrayList<Integer> deletedLineNumbers = new ArrayList();
+                deletedLineNumbers.add(deletedLineNumber);
+                annotateCommits.put(line, deletedLineNumbers);
+            } else {
+                annotateCommits.get(line).add(deletedLineNumber);
+            }
+        }
+        result.put(bugfixCommit, annotateCommits);
     }
 
     private BlameResult annotateFile(String changedFilePath) throws GitAPIException {
