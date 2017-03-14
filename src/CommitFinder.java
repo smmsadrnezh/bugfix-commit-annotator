@@ -4,9 +4,13 @@ import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +33,7 @@ public class CommitFinder {
         add("issue");
         add("resolve");
     }};
-    private HashMap<RevCommit, HashMap> result = new HashMap<>();
+    private HashMap<ObjectId, HashMap> result = new HashMap<>();
 
     CommitFinder(String path) {
         this.path = path;
@@ -77,11 +81,7 @@ public class CommitFinder {
 
             DiffManager diffManager = new DiffManager(repository);
 
-            /** find commit Id to annotate from */
-            ObjectId annotateFromCommitId = bugfixCommit.getId();
-
-            /** checkout to one commit before annotateFromCommitId */
-            git.checkout().setName(bugfixCommit.getParent(0).getName()).call();
+            checkoutOneCommitBeforeBugfix(bugfixCommit);
 
             /** Find MODIFY edits */
             for (DiffEntry diffEntry : diffManager.getDiffEntries(bugfixCommit)) {
@@ -92,17 +92,17 @@ public class CommitFinder {
 
                     for (Edit edit : diffManager.getEdits(diffEntry)) {
 
-                        /** find deleted line numbers */
-                        ArrayList<Integer> deletedLines = new ArrayList();
-                        if (edit.getEndA() < edit.getEndB()) {
-                            for (int line = edit.getEndA(); line <= edit.getEndB(); line++) {
-                                deletedLines.add(line);
-                            }
-                        } else {
-                            deletedLines.add(edit.getEndB());
+                        ArrayList<Integer> bugfixCommitDeletedLineNumbers = getBugfixCommitDeletedLineNumbers(edit);
+
+                        String beforeBuggyCommitCode;
+                        for (Integer bugfixCommitDeletedLineNumber : bugfixCommitDeletedLineNumbers) {
+                            RevCommit buggyCommit = annotateLine(fileBlameResult, bugfixCommitDeletedLineNumber);
+                            beforeBuggyCommitCode = getCode(buggyCommit,changedFilePath);
+                            AbstractSyntaxTreeCrawler astParser = new AbstractSyntaxTreeCrawler();
+                            astParser.buildAST(beforeBuggyCommitCode, bugfixCommitDeletedLineNumber);
                         }
 
-//                        buildResult(deletedLines, annotateFromCommitId, fileBlameResult, bugfixCommit);
+//                        buildResult(bugfixCommitDeletedLineNumbers, fileBlameResult, bugfixCommit);
 
                     }
                 }
@@ -110,43 +110,58 @@ public class CommitFinder {
         }
     }
 
-    private String getCode(RevCommit revCommit) {
-        return "salam";
+    private ArrayList<Integer> getBugfixCommitDeletedLineNumbers(Edit edit) {
+        ArrayList<Integer> deletedLines = new ArrayList();
+        if (edit.getEndA() < edit.getEndB()) {
+            for (int line = edit.getEndA(); line <= edit.getEndB(); line++) {
+                deletedLines.add(line);
+            }
+        } else {
+            deletedLines.add(edit.getEndB());
+        }
+        return deletedLines;
     }
 
-    private void buildResult(ArrayList<Integer> deletedLines, ObjectId annotateFromCommitId, BlameResult fileBlameResult, RevCommit bugfixCommit) throws GitAPIException, IOException {
+    private void checkoutOneCommitBeforeBugfix(RevCommit bugfixCommit) throws GitAPIException {
+        git.checkout().setName(bugfixCommit.getParent(0).getName()).call();
+    }
+
+    private String getCode(RevCommit buggyCommit,String filePath) throws IOException {
+        RevTree tree = buggyCommit.getTree();
+        TreeWalk treeWalk = new TreeWalk(repository);
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(true);
+        treeWalk.setFilter(PathFilter.create(filePath));
+        ObjectId objectId = treeWalk.getObjectId(0);
+        ObjectLoader loader = repository.open(objectId);
+
+        return loader.toString();
+
+    }
+
+    private void buildResult(ArrayList<Integer> bugfixCommitDeletedLineNumbers, BlameResult fileBlameResult, RevCommit bugfixCommit) throws GitAPIException, IOException {
+
         /** find annotate commits for each line */
         HashMap<RevCommit, ArrayList<Integer>> annotateCommits = new HashMap<>();
-        RevCommit line;
-        for (Integer deletedLineNumber : deletedLines) {
-            line = annotateLine(annotateFromCommitId, fileBlameResult, deletedLineNumber);
-            if (annotateCommits.get(line) == null) {
+        RevCommit buggyCommit;
+        for (Integer bugfixCommitDeletedLineNumber : bugfixCommitDeletedLineNumbers) {
+            buggyCommit = annotateLine(fileBlameResult, bugfixCommitDeletedLineNumber);
+            if (annotateCommits.get(buggyCommit) == null) {
                 ArrayList<Integer> deletedLineNumbers = new ArrayList();
-                deletedLineNumbers.add(deletedLineNumber);
-                annotateCommits.put(line, deletedLineNumbers);
+                deletedLineNumbers.add(bugfixCommitDeletedLineNumber);
+                annotateCommits.put(buggyCommit, deletedLineNumbers);
             } else {
-                annotateCommits.get(line).add(deletedLineNumber);
+                annotateCommits.get(buggyCommit).add(bugfixCommitDeletedLineNumber);
             }
         }
-        result.put(bugfixCommit, annotateCommits);
+        result.put(bugfixCommit.getId(), annotateCommits);
     }
 
     private BlameResult annotateFile(String changedFilePath) throws GitAPIException {
         return git.blame().setFilePath(changedFilePath).call();
     }
 
-    private RevCommit annotateLine(ObjectId annotateFromCommitId, BlameResult fileBlameResult, int lineNumber) throws GitAPIException, IOException {
-
-        System.out.println("Line Number: " + lineNumber);
-        System.out.println("Annotate From Commit ID: " + annotateFromCommitId.toString().replaceAll("commit ", "").replaceAll("-", "").replaceAll(" sp", ""));
-
-        RevCommit annotationCommit = fileBlameResult.getSourceCommit(lineNumber - 1);
-
-        System.out.println("Annotated Commit: " + annotationCommit.getShortMessage());
-        System.out.println("Annotated ID: " + annotationCommit.getId().toString().replaceAll("commit ", "").replaceAll("-", "").replaceAll(" p", ""));
-        System.out.println("");
-
-        return annotationCommit;
-
+    private RevCommit annotateLine(BlameResult fileBlameResult, int lineNumber) throws GitAPIException, IOException {
+        return fileBlameResult.getSourceCommit(lineNumber - 1);
     }
 }
