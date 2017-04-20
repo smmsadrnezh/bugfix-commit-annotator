@@ -12,8 +12,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -162,6 +161,6 @@ public class CommitFinder {
     }
 
     private RevCommit annotateLine(BlameResult fileBlameResult, int lineNumber) throws GitAPIException, IOException {
-        return fileBlameResult.getSourceCommit(lineNumber - 1);
+        return fileBlameResult.getSourceCommit(lineNumber-1);
     }
 }

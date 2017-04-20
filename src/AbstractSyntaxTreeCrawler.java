@@ -3,6 +3,7 @@ import org.eclipse.jdt.core.dom.*;
 import java.util.HashSet;
 import java.util.Set;
 
+
 /**
  * Created by smmsadrnezh on 2/20/17.
  */
@@ -22,18 +23,18 @@ public class AbstractSyntaxTreeCrawler {
 
             public boolean visit(VariableDeclarationFragment node) {
                 SimpleName name = node.getName();
-                if (cu.getLineNumber(name.getStartPosition()) == lineNumber) {
+//                if (cu.getLineNumber(name.getStartPosition()) == lineNumber) {
                     this.names.add(name.getIdentifier());
                     System.out.println(name);
-                }
+//                }
                 return false;
             }
 
             public boolean visit(SimpleName node) {
                 if (this.names.contains(node.getIdentifier())) {
-                    if (cu.getLineNumber(node.getStartPosition()) == lineNumber) {
+//                    if (cu.getLineNumber(node.getStartPosition()) == lineNumber) {
                         System.out.println(node);
-                    }
+//                    }
                 }
                 return true;
             }

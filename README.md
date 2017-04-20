@@ -3,12 +3,21 @@ It find all commits which their commit messages matches the specific regular exp
 How to run
 =========
 
-This plugin is based on [JGit by eclipse](https://eclipse.org/jgit). So for running the project you have to download and add these jar files to class path of the project:
+This plugin is based on [JGit by eclipse](https://eclipse.org/jgit) and [Eclipse JDT](http://www.eclipse.org/jdt). So for running the project you have to download and add these jar files to class path of the project:
 
-  * slf4j-api.jar
-  * slf4j-jdk14.jar
-  * org.eclipse.jgit.jar
-  * jdtcore-3.1.0.jar
+  * slf4j-api-1.7.21
+  * slf4j-jdk14-1.7.21
+  * org.eclipse.jgit-4.5.0.201609210915-r
+  
+  * [org.eclipse.core.resources-3.5.2](https://mvnrepository.com/artifact/org.eclipse/core-resources/3.5.2)
+  * [org.eclipse.jdt.core-3.5.2](https://mvnrepository.com/artifact/org.eclipse/jdt-core/3.5.2)
+  * [org.eclipse.core.runtime-3.5.0](https://mvnrepository.com/artifact/org.eclipse.core/org.eclipse.core.runtime/3.5.0.v20090525)
+  * [org.eclipse.osgi-3.5.2](https://mvnrepository.com/artifact/org.eclipse.osgi/org.eclipse.osgi/3.5.2.R35x_v20100126)
+  * [org.eclipse.core.contenttype-3.4.1](https://mvnrepository.com/artifact/org.eclipse.core/org.eclipse.core.contenttype/3.4.100)
+  * [org.eclipse.core.jobs-3.4.100](https://mvnrepository.com/artifact/org.eclipse.core/org.eclipse.core.jobs/3.4.100.v20090429-1800)
+  * [org.eclipse.equinox.common-3.5.0](https://mvnrepository.com/artifact/org.eclipse.equinox/org.eclipse.equinox.common/3.5.0.v20090520-1800)
+  * [org.eclipse.equinox.preferences-3.3.0](https://mvnrepository.com/artifact/org.eclipse.equinox/org.eclipse.equinox.preferences/3.3.0.v20100503)
+  
 
 If you are using IntelliJ IDE you can do this by going to:
 
@@ -20,6 +29,8 @@ How to use
 After running the project, enter the path to .git directory in your repository:
 
 `/path/to/repository/.git`
+
+`/home/smmsadrnezh/Desktop/lab/bilityab/.git`
 
 TODO
 =========
