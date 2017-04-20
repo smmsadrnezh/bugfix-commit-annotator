@@ -97,7 +97,6 @@ public class CommitFinder {
                         for (Integer bugfixCommitDeletedLineNumber : bugfixCommitDeletedLineNumbers) {
                             RevCommit buggyCommit = annotateLine(fileBlameResult, bugfixCommitDeletedLineNumber);
                             beforeBuggyCommitCode = getCode(buggyCommit,changedFilePath);
-                            System.out.println(beforeBuggyCommitCode);
                             AbstractSyntaxTreeCrawler astParser = new AbstractSyntaxTreeCrawler();
                             astParser.buildAST(beforeBuggyCommitCode, bugfixCommitDeletedLineNumber);
                         }

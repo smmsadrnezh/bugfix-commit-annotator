@@ -11,6 +11,7 @@ import java.util.Set;
 
 public class AbstractSyntaxTreeCrawler {
     public void buildAST(String code , Integer lineNumber) {
+        System.out.println(lineNumber);
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(code.toCharArray());
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -23,18 +24,18 @@ public class AbstractSyntaxTreeCrawler {
 
             public boolean visit(VariableDeclarationFragment node) {
                 SimpleName name = node.getName();
-//                if (cu.getLineNumber(name.getStartPosition()) == lineNumber) {
+                if (cu.getLineNumber(name.getStartPosition()) == lineNumber) {
                     this.names.add(name.getIdentifier());
                     System.out.println(name);
-//                }
+                }
                 return false;
             }
 
             public boolean visit(SimpleName node) {
                 if (this.names.contains(node.getIdentifier())) {
-//                    if (cu.getLineNumber(node.getStartPosition()) == lineNumber) {
+                    if (cu.getLineNumber(node.getStartPosition()) == lineNumber) {
                         System.out.println(node);
-//                    }
+                    }
                 }
                 return true;
             }

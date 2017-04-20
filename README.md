@@ -1,4 +1,4 @@
-It find all commits which their commit messages matches the specific regular expression with "bugfix" or "fix" or numbers. After that it finds all affected lines of code in those commits and then it looks for all annotate commits (or blame-commit) for each of these lines. So finally we have all commits with bugs which are fixed later in some other commits. After that we build AST from the buggy commit and find library methods and classes which caused bugs.
+It finds all commits which their commit messages match the specific regular expression with "bugfix" or "fix" or numbers. After that, it finds all affected lines of code in those commits and then it looks for all annotate commits (or blame-commit) for each of these lines. So finally we have all commits with bugs which are fixed later in some other commits. After that, it build AST from the buggy commit and find library methods and classes which caused bugs.
 
 How to run
 =========
@@ -18,7 +18,6 @@ This plugin is based on [JGit by eclipse](https://eclipse.org/jgit) and [Eclipse
   * [org.eclipse.equinox.common-3.5.0](https://mvnrepository.com/artifact/org.eclipse.equinox/org.eclipse.equinox.common/3.5.0.v20090520-1800)
   * [org.eclipse.equinox.preferences-3.3.0](https://mvnrepository.com/artifact/org.eclipse.equinox/org.eclipse.equinox.preferences/3.3.0.v20100503)
   
-
 If you are using IntelliJ IDE you can do this by going to:
 
 `File → Project Structure → Project Settings → Modules → Dependencies → "+" sign → JARs or directories → Select the jar file and click on OK`
@@ -26,7 +25,7 @@ If you are using IntelliJ IDE you can do this by going to:
 How to use
 =========
 
-After running the project, enter the path to .git directory in your repository:
+After running the project, enter the path to the .git directory in your repository:
 
 `/path/to/repository/.git`
 
