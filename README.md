@@ -5,9 +5,9 @@ How to run
 
 This plugin is based on [JGit by eclipse](https://eclipse.org/jgit) and [Eclipse JDT](http://www.eclipse.org/jdt). So for running the project you have to download and add these jar files to class path of the project:
 
-  * slf4j-api-1.7.21
-  * slf4j-jdk14-1.7.21
-  * org.eclipse.jgit-4.5.0.201609210915-r
+  * [org.slf4j.slf4j-api-1.7.21](https://mvnrepository.com/artifact/org.slf4j/slf4j-api/1.7.21)
+  * [org.slf4j.slf4j-jdk14-1.7.21](https://mvnrepository.com/artifact/org.slf4j/slf4j-jdk14/1.7.21)
+  * [org.eclipse.jgit-4.5.0.201609210915-r](https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit/4.5.0.201609210915-r)
   
   * [org.eclipse.core.resources-3.5.2](https://mvnrepository.com/artifact/org.eclipse/core-resources/3.5.2)
   * [org.eclipse.jdt.core-3.5.2](https://mvnrepository.com/artifact/org.eclipse/jdt-core/3.5.2)

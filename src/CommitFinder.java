@@ -97,6 +97,7 @@ public class CommitFinder {
                         for (Integer bugfixCommitDeletedLineNumber : bugfixCommitDeletedLineNumbers) {
                             RevCommit buggyCommit = annotateLine(fileBlameResult, bugfixCommitDeletedLineNumber);
                             beforeBuggyCommitCode = getCode(buggyCommit,changedFilePath);
+                            System.out.println(beforeBuggyCommitCode);
                             AbstractSyntaxTreeCrawler astParser = new AbstractSyntaxTreeCrawler();
                             astParser.buildAST(beforeBuggyCommitCode, bugfixCommitDeletedLineNumber);
                         }
@@ -125,7 +126,7 @@ public class CommitFinder {
         git.checkout().setName(bugfixCommit.getParent(0).getName()).call();
     }
 
-    private String getCode(RevCommit buggyCommit,String filePath) throws IOException {
+    private String getCode(RevCommit buggyCommit, String filePath) throws IOException {
         RevTree tree = buggyCommit.getTree();
         TreeWalk treeWalk = new TreeWalk(repository);
         treeWalk.addTree(tree);
@@ -134,7 +135,24 @@ public class CommitFinder {
         ObjectId objectId = treeWalk.getObjectId(0);
         ObjectLoader loader = repository.open(objectId);
 
-        return loader.toString();
+
+        OutputStream output = new OutputStream()
+        {
+            private StringBuilder string = new StringBuilder();
+            @Override
+            public void write(int b) throws IOException {
+                this.string.append((char) b );
+            }
+
+            //Netbeans IDE automatically overrides this toString()
+            public String toString(){
+                return this.string.toString();
+            }
+        };
+
+        loader.copyTo(output);
+
+        return output.toString();
 
     }
 
