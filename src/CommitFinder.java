@@ -3,6 +3,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.Edit;
+import org.eclipse.jgit.diff.RawText;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
@@ -11,6 +12,8 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
+
+import com.gitblit.models.AnnotatedLine;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -93,12 +96,13 @@ public class CommitFinder {
 
                         ArrayList<Integer> bugfixCommitDeletedLineNumbers = getBugfixCommitDeletedLineNumbers(edit);
 
-                        String beforeBuggyCommitCode;
+                        String afterBuggyCommitCode;
                         for (Integer bugfixCommitDeletedLineNumber : bugfixCommitDeletedLineNumbers) {
                             RevCommit buggyCommit = annotateLine(fileBlameResult, bugfixCommitDeletedLineNumber);
-                            beforeBuggyCommitCode = getCode(buggyCommit,changedFilePath);
+                            afterBuggyCommitCode = getCode(buggyCommit, changedFilePath);
                             AbstractSyntaxTreeCrawler astParser = new AbstractSyntaxTreeCrawler();
-                            astParser.buildAST(beforeBuggyCommitCode, bugfixCommitDeletedLineNumber);
+                            // TODO: Find Line Numbers in Buggy Commit and send it to buildAST
+                            astParser.buildAST(afterBuggyCommitCode, bugfixCommitDeletedLineNumber);
                         }
 
 //                        buildResult(bugfixCommitDeletedLineNumbers, fileBlameResult, bugfixCommit);
@@ -111,12 +115,8 @@ public class CommitFinder {
 
     private ArrayList<Integer> getBugfixCommitDeletedLineNumbers(Edit edit) {
         ArrayList<Integer> deletedLines = new ArrayList();
-        if (edit.getEndA() < edit.getEndB()) {
-            for (int line = edit.getEndA(); line <= edit.getEndB(); line++) {
-                deletedLines.add(line);
-            }
-        } else {
-            deletedLines.add(edit.getEndB());
+        for (int line = edit.getBeginA() + 1; line <= edit.getEndA(); line++) {
+            deletedLines.add(line);
         }
         return deletedLines;
     }
@@ -135,16 +135,15 @@ public class CommitFinder {
         ObjectLoader loader = repository.open(objectId);
 
 
-        OutputStream output = new OutputStream()
-        {
+        OutputStream output = new OutputStream() {
             private StringBuilder string = new StringBuilder();
+
             @Override
             public void write(int b) throws IOException {
-                this.string.append((char) b );
+                this.string.append((char) b);
             }
 
-            //Netbeans IDE automatically overrides this toString()
-            public String toString(){
+            public String toString() {
                 return this.string.toString();
             }
         };
@@ -178,6 +177,10 @@ public class CommitFinder {
     }
 
     private RevCommit annotateLine(BlameResult fileBlameResult, int lineNumber) throws GitAPIException, IOException {
-        return fileBlameResult.getSourceCommit(lineNumber-1);
+        RevCommit buggyCommit = fileBlameResult.getSourceCommit(lineNumber);
+        RawText rawText = fileBlameResult.getResultContents();
+        System.out.println(rawText.getString(lineNumber - 1));
+        AnnotatedLine line = new AnnotatedLine(buggyCommit, lineNumber + 1, rawText.getString(lineNumber));
+        return fileBlameResult.getSourceCommit(lineNumber);
     }
 }
